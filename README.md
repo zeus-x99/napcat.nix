@@ -45,23 +45,28 @@ NixOS module for running NapCat QQ bot service. NapCat is a modern protocol-side
     "123456789" = {  # 你的 QQ 号
       enable = true;
 
-      # HTTP 服务器配置
-      httpServers = [{
-        name = "default";
-        enable = true;
-        port = 3000;
-        host = "0.0.0.0";
-        token = "your-token-here";  # 建议设置鉴权密钥
-      }];
+      # OneBot 配置
+      onebot = {
+        network = {
+          # HTTP 服务器配置
+          httpServers = [{
+            name = "default";
+            enable = true;
+            port = 3000;
+            host = "0.0.0.0";
+            token = "your-token-here";  # 建议设置鉴权密钥
+          }];
 
-      # 或使用 WebSocket 服务器
-      websocketServers = [{
-        name = "default";
-        enable = true;
-        port = 3001;
-        host = "0.0.0.0";
-        token = "your-token-here";
-      }];
+          # 或使用 WebSocket 服务器
+          websocketServers = [{
+            name = "default";
+            enable = true;
+            port = 3001;
+            host = "0.0.0.0";
+            token = "your-token-here";
+          }];
+        };
+      };
     };
   };
 }
@@ -122,67 +127,92 @@ nix run
 
 ## 配置选项
 
-### HTTP 服务器
+### 完整配置示例
 
 ```nix
-httpServers = [{
-  name = "default";
+services.napcat.instances."123456789" = {
   enable = true;
-  port = 3000;
-  host = "0.0.0.0";
-  enableCors = true;
-  enableWebsocket = true;
-  messagePostFormat = "array";  # 或 "string"
-  token = "";  # 建议设置
-  debug = false;
-}];
-```
+  user = "napcat";  # 可选，默认 napcat
+  group = "napcat";  # 可选，默认 napcat
 
-### WebSocket 服务器（正向 WS）
+  # OneBot11 协议配置
+  onebot = {
+    network = {
+      # HTTP 服务器（正向 HTTP）
+      httpServers = [{
+        name = "default";
+        enable = true;
+        port = 3000;
+        host = "0.0.0.0";
+        enableCors = true;
+        enableWebsocket = true;
+        messagePostFormat = "array";  # 或 "string"
+        token = "";  # 建议设置
+        debug = false;
+      }];
 
-```nix
-websocketServers = [{
-  name = "default";
-  enable = true;
-  port = 3001;
-  host = "0.0.0.0";
-  messagePostFormat = "array";
-  reportSelfMessage = false;
-  token = "";
-  enableForcePushEvent = true;
-  debug = false;
-  heartInterval = 30000;
-}];
-```
+      # WebSocket 服务器（正向 WS）
+      websocketServers = [{
+        name = "default";
+        enable = true;
+        port = 3001;
+        host = "0.0.0.0";
+        messagePostFormat = "array";
+        reportSelfMessage = false;
+        token = "";
+        enableForcePushEvent = true;
+        debug = false;
+        heartInterval = 30000;
+      }];
 
-### HTTP 客户端（上报）
+      # HTTP 客户端（上报）
+      httpClients = [{
+        name = "default";
+        enable = true;
+        url = "http://your-server:port/webhook";
+        messagePostFormat = "array";
+        reportSelfMessage = false;
+        token = "";
+        debug = false;
+      }];
 
-```nix
-httpClients = [{
-  name = "default";
-  enable = true;
-  url = "http://your-server:port/webhook";
-  messagePostFormat = "array";
-  reportSelfMessage = false;
-  token = "";
-  debug = false;
-}];
-```
+      # WebSocket 客户端（反向 WS）
+      websocketClients = [{
+        name = "default";
+        enable = true;
+        url = "ws://your-server:port/ws";
+        messagePostFormat = "array";
+        reportSelfMessage = false;
+        token = "";
+        reconnectInterval = 5000;
+        debug = false;
+        heartInterval = 30000;
+      }];
+    };
 
-### WebSocket 客户端（反向 WS）
+    # 其他 OneBot 配置
+    musicSignUrl = "";  # 音乐签名服务器地址
+    enableLocalFile2Url = false;  # 是否将本地文件转换为 URL
+    parseMultMsg = false;  # 是否解析合并转发消息
+  };
 
-```nix
-websocketClients = [{
-  name = "default";
-  enable = true;
-  url = "ws://your-server:port/ws";
-  messagePostFormat = "array";
-  reportSelfMessage = false;
-  token = "";
-  reconnectInterval = 5000;
-  debug = false;
-  heartInterval = 30000;
-}];
+  # NapCat 核心配置
+  napcat = {
+    fileLog = true;
+    consoleLog = true;
+    fileLogLevel = "info";  # debug | info | error
+    consoleLogLevel = "info";
+    packetServer = "";  # PacketServer 地址（高级功能）
+  };
+
+  # WebUI 配置
+  webui = {
+    host = "0.0.0.0";
+    port = 6099;  # 设置为 0 禁用 WebUI
+    token = "";  # 留空自动生成
+    loginRate = 3;  # 每分钟登录次数限制
+  };
+};
 ```
 
 ## License
