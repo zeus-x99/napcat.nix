@@ -7,7 +7,7 @@
 in {
   script = pkgs.writeScriptBin "NapCat" ''
     #!${pkgs.runtimeShell}
-    mkdir -p ${cfg.qq_config_dir} ${cfg.nc_config_dir}
+    mkdir -p ${cfg.qq_config_dir} ${cfg.nc_config_dir} ${cfg.cache_dir}
     ${pkgs.bubblewrap}/bin/bwrap \
       --unshare-all \
       --share-net \
@@ -18,6 +18,7 @@ in {
       --ro-bind ${pkgs.tzdata}/share/zoneinfo/Asia/Shanghai /etc/localtime \
       --bind ${cfg.nc_config_dir} /root/napcat/config \
       --bind ${cfg.qq_config_dir} /root/.config/QQ \
+      --bind ${cfg.cache_dir} /root/napcat/cache \
       --proc /proc \
       --dev /dev \
       --tmpfs /tmp \
@@ -26,7 +27,10 @@ in {
 
         createService() {
           mkdir -p /services/$1
-          echo -e "#!${pkgs.runtimeShell}\n$2" > /services/$1/run
+          {
+            echo "#!${pkgs.runtimeShell}"
+            echo "exec $2"
+          } > /services/$1/run
           chmod +x /services/$1/run
         }
 
@@ -44,7 +48,7 @@ in {
         export DISPLAY=':114'
         createService xvfb 'Xvfb :114 > /dev/null 2>&1'
         cp -rf ${napcat.patched}/napcat/* /root/napcat/
-        createService program "${napcat.program} $@"
+        createService program "${napcat.program} $*"
         runsvdir /services
       ''} "$@"
   '';

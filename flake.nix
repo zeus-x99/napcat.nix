@@ -1,12 +1,16 @@
 {
   outputs = {
     self, nixpkgs, flake-utils,
-  }: flake-utils.lib.eachDefaultSystem (system: let
+  }: {
+    # NixOS Module
+    nixosModules.default = import ./module.nix;
+  } // flake-utils.lib.eachDefaultSystem (system: let
     pkgs = import nixpkgs { inherit system; };
     # 默认配置
     defaultConfig = {
       qq_config_dir = "/root/napcat/config";
       nc_config_dir = "/root/.config/QQ";
+      cache_dir = "/root/napcat/cache";
     };
   in rec {
     devShells.default = pkgs.mkShell {};
