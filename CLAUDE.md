@@ -58,7 +58,7 @@ nix build
 nix build --extra-experimental-features flakes
 
 # Run from GitHub directly
-nix run github:initialencounter/napcat.nix
+nix run github:zeus-x99/napcat.nix
 ```
 
 ### Updating Dependencies

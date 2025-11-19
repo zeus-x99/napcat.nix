@@ -14,9 +14,9 @@ jobs:
     continue-on-error: true
     steps: 
 
-      - name: Download | Download CI script 
+      - name: Download | Download CI script
         run: |
-          curl -L -o ci.sh https://github.com/initialencounter/napcat.nix/raw/refs/heads/master/linux-qq-patch.sh
+          curl -L -o ci.sh https://github.com/zeus-x99/napcat.nix/raw/refs/heads/master/linux-qq-patch.sh
           ls -la
           cat ci.sh
           
